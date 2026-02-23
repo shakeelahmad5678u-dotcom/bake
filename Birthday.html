@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday Hamza</title>
+
+<style>
+body{
+  margin:0;
+  background:black;
+  overflow:hidden;
+  font-family:Verdana;
+  text-align:center;
+  color:white;
+}
+
+/* PRELOADER */
+#preloader{
+  position:fixed;
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+  z-index:9999;
+}
+
+.circle{
+  position:relative;
+  width:260px;
+  height:260px;
+  animation:rotate 3s linear infinite;
+}
+
+@keyframes rotate{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+
+.circle span{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform-origin:0 120px;
+  font-size:24px;
+  font-weight:bold;
+}
+
+/* CONTENT */
+#content{
+  display:none;
+  position:relative;
+  height:100vh;
+}
+
+canvas{
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+/* BUTTON */
+#continueBtn{
+  position:absolute;
+  left:50%;
+  bottom:60px;
+  transform:translateX(-50%);
+  padding:14px 35px;
+  font-size:20px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(45deg,#ff0080,#ff8c00);
+  color:white;
+  cursor:pointer;
+  opacity:0;
+  display:none;
+  transition:opacity 1.5s ease;
+  z-index:10;
+}
+
+#continueBtn.show{
+  display:block;
+  opacity:1;
+}
+
+/* CAKE */
+#cake{
+  display:none;
+  position:absolute;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:120px;
+  animation:bounce 1s infinite alternate;
+}
+
+@keyframes bounce{
+  from{transform:translate(-50%,-50%) scale(1);}
+  to{transform:translate(-50%,-55%) scale(1.1);}
+}
+
+/* NAME TEXT */
+#nameText{
+  display:none;
+  position:absolute;
+  top:65%;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:40px;
+  font-weight:bold;
+  background:linear-gradient(45deg,#ff0080,#00ffff,#ffff00);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+</style>
+</head>
+
+<body>
+
+<div id="preloader">
+  <div class="circle" id="textCircle"></div>
+</div>
+
+<div id="content">
+  <canvas id="c"></canvas>
+  <button id="continueBtn">Continue 🎉</button>
+  <div id="cake">🎂</div>
+  <div id="nameText">Happy Birthday Hamza 🎉</div>
+</div>
+
+<audio id="music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+<script>
+
+/* PRELOADER TEXT */
+let text="HAPPY BIRTHDAY ";
+let circle=document.getElementById("textCircle");
+
+for(let i=0;i<text.length;i++){
+  let span=document.createElement("span");
+  span.innerText=text[i];
+  let hue=i*360/text.length;
+  span.style.color=`hsl(${hue},100%,50%)`;
+  span.style.transform=`rotate(${i*360/text.length}deg)`;
+  circle.appendChild(span);
+}
+
+setTimeout(()=>{
+  document.getElementById("preloader").style.display="none";
+  document.getElementById("content").style.display="block";
+},3000);
+
+/* BALLOONS */
+const c=document.getElementById("c");
+let w=c.width=window.innerWidth;
+let h=c.height=window.innerHeight;
+let ctx=c.getContext("2d");
+
+let balloons=[];
+let colors=["#ff4d4d","#4dff4d","#4da6ff","#ffff4d","#ff66ff","#00ffff"];
+
+for(let i=0;i<30;i++){
+  balloons.push({
+    x:Math.random()*w,
+    y:h+50,
+    size:20+Math.random()*20,
+    speed:1+Math.random()*2,
+    color:colors[Math.floor(Math.random()*colors.length)]
+  });
+}
+
+function drawBalloon(b){
+  ctx.beginPath();
+  ctx.fillStyle=b.color;
+  ctx.ellipse(b.x,b.y,b.size,b.size*1.2,0,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(b.x,b.y+b.size*1.2);
+  ctx.lineTo(b.x,b.y+b.size*2);
+  ctx.strokeStyle="#fff";
+  ctx.stroke();
+}
+
+let finished=false;
+
+function animate(){
+  requestAnimationFrame(animate);
+  ctx.fillStyle="#111";
+  ctx.fillRect(0,0,w,h);
+
+  let doneCount=0;
+
+  balloons.forEach(b=>{
+    b.y-=b.speed;
+    drawBalloon(b);
+    if(b.y<-100) doneCount++;
+  });
+
+  if(doneCount===balloons.length && !finished){
+    finished=true;
+    let btn=document.getElementById("continueBtn");
+    btn.style.display="block";
+    setTimeout(()=>btn.classList.add("show"),100);
+  }
+}
+
+animate();
+
+/* CONTINUE CLICK */
+document.getElementById("continueBtn").onclick=function(){
+  this.style.display="none";
+  document.getElementById("cake").style.display="block";
+  document.getElementById("nameText").style.display="block";
+  document.getElementById("music").play();
+  fireworks();
+};
+
+/* FIREWORKS EFFECT */
+function fireworks(){
+  for(let i=0;i<150;i++){
+    setTimeout(()=>{
+      ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+      ctx.beginPath();
+      ctx.arc(Math.random()*w,Math.random()*h,3,0,Math.PI*2);
+      ctx.fill();
+    },i*40);
+  }
+}
+
+window.addEventListener("resize",()=>{
+  w=c.width=window.innerWidth;
+  h=c.height=window.innerHeight;
+});
+
+</script>
+</body>
+</html>
